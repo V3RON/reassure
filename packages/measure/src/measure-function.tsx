@@ -11,6 +11,8 @@ export interface MeasureFunctionOptions {
 }
 
 export async function measureFunction(fn: () => void, options?: MeasureFunctionOptions): Promise<MeasureResults> {
+  assertNotUsingFakeTimers();
+
   const stats = await measureFunctionInternal(fn, options);
 
   if (options?.writeFile !== false) {
@@ -41,4 +43,17 @@ function measureFunctionInternal(fn: () => void, options?: MeasureFunctionOption
 
 function getCurrentTime() {
   return performance.now();
+}
+
+function assertNotUsingFakeTimers() {
+  const isUsingFakeTimers =
+    typeof jest !== 'undefined' &&
+    typeof setTimeout !== 'undefined' &&
+    (Object.hasOwn(setTimeout, '_isMockFunction') || Object.hasOwn(setTimeout, 'clock'));
+
+  if (isUsingFakeTimers) {
+    throw new Error(
+      'Reassure is not compatible jest.useFakeTimers. You should only use fake timers in your feature tests.'
+    );
+  }
 }

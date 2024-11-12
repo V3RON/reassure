@@ -67,3 +67,11 @@ test('measureFunction should log error when running under incorrect node flags',
     Make sure you use the Reassure CLI and run it using "reassure" command."
   `);
 });
+
+test('measureFunction should refuse to run with fake timers', async () => {
+  jest.useFakeTimers();
+  await expect(() => measureFunction(() => fib(5), { runs: 1, warmupRuns: 0, writeFile: false })).rejects.toThrow(
+    /fake timers/
+  );
+  jest.useRealTimers();
+});
